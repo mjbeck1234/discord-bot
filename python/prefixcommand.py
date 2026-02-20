@@ -513,8 +513,15 @@ async def updateStatusBoard(guild):
             query = await getPFieldStatus()
 
             #populate name
-            name = fileds[i] + " -- Dep: " + str(int(query[fileds[i].lower()+"_d"])) + "  Arr: " +  str(int(query[fileds[i].lower()+"_a"]))
-            await channel.edit(name = name, reason = "Status board update")
+            new_name = fileds[i] + " -- Dep: " + str(int(query[fileds[i].lower()+"_d"])) + "  Arr: " +  str(int(query[fileds[i].lower()+"_a"]))
+            # ✅ Only rename if changed
+            if channel.name != new_name:
+                await channel.edit(
+                    name=new_name,
+                    reason="Status board update"
+                )
+            else:
+                pass
         
         except Exception as e:
             print("error in updateStatusBoard(): ") 
@@ -1108,3 +1115,36 @@ async def delete_expired_messages(guild):
                 remaining.append(item)
 
         save_delete_queue(remaining)
+
+
+async def get_ace_discord_ids():
+    ace_discord_ids = []
+    data = await webQuery_async("https://api.vatusa.net/user/roles/ZHQ/ACE")
+    data = data["data"]
+    # Loop through each member and fetch discord_id
+    for member in data:
+        cid = member.get("cid")
+        if cid:
+            user_data = await webQuery_async(f"https://api.vatusa.net/user/{cid}")
+            user_data = user_data["data"]
+            discord_id = user_data.get("discord_id")
+            if discord_id:
+                ace_discord_ids.append(int(discord_id))
+
+    return ace_discord_ids
+
+
+async def aceTeam_role(message,guild):
+    ace_ids = await get_ace_discord_ids()
+    if message.author.id in ace_ids:
+        aceRole = discord.utils.get(guild.roles,name="ACE Team")
+
+        if aceRole in message.author.roles:
+            await message.send("You already have ACE TEAM role.")
+        else:
+            await message.author.add_roles(aceRole)
+            await message.author.send("✅ You are ACE TEAM. Role added.")
+
+    else:
+        await message.author.send("❌You are not on ACE TEAM list.")
+

@@ -136,6 +136,9 @@ async def on_message(message): # all reaction from message
         elif command == "helpme":
             await requestRelief(message,command,guild,alert_type = "workload")
             noCommand = False
+        elif command == "ace":
+            await aceTeam_role(message,guild)
+            noCommand = False
 
         if(SENIOR_STAFF in message.author.roles or FACILITY_STAFF in message.author.roles or TRAINING_STAFF in message.author.roles):
             if(command == "spontaneous" or command == "sp" ):
@@ -226,11 +229,9 @@ async def monitor_active_controller():
     act_role = discord.utils.get(guild.roles,name= "Active Controller")
     # Process all currently active controllers
     for controller in actives:
-        discord_id = controller['discord_id']
         if not isinstance(controller, dict):
             print(f"Skipping invalid controller entry: {controller}")
             continue
-
         discord_id = controller.get('discord_id')
         if not discord_id:
             print(f"{controller.get('cid')} does not have discord linked")
@@ -346,7 +347,11 @@ async def on_voice_state_update(member, before, after):
     elif(after.channel.category.name == 'Sterile Controlling Floor'):
         await member.add_roles(act_role)
         
-@tasks.loop(seconds=900)       
+@tasks.loop(time=[
+    datetime.time(hour=h, minute=m)
+    for h in range(24)
+    for m in range(0,60,10)
+])       
 async def quaterHourLooped_tasks():
     if not DEBUG:
         await updateStatusBoard(guild)
@@ -385,3 +390,5 @@ async def on_scheduled_event_update(before,after):
             auto_archive_duration=4320  # 72 hours
         )
 client.run(discord_token)
+
+
