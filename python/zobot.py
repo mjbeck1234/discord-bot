@@ -89,6 +89,8 @@ async def on_raw_reaction_add(payload):
         await payload.member.add_roles(discord.utils.get(guild.roles,name="Group Flights"))
     elif(str(payload.emoji) == '🎮') and channel.name == "role-assignments" and not payload.member.bot:
         await payload.member.add_roles(discord.utils.get(guild.roles,name="Game nights"))
+    elif(str(payload.emoji) == '⛑️') and channel.name == "role-assignments" and not payload.member.bot:
+        await payload.member.add_roles(discord.utils.get(guild.roles,name="Relief"))
     elif(str(payload.emoji) == '✅') and channel.name == "spontaneous-training" and not payload.member.bot and TRAINING_STAFF in payload.member.roles:
         message = await channel.fetch_message(payload.message_id)
         embed = message.embeds[0]
@@ -109,6 +111,8 @@ async def on_raw_reaction_remove(payload):
         await member.remove_roles(discord.utils.get(guild.roles,name="Group Flights"))
     elif(str(payload.emoji) == '🎮') and channel.name == "role-assignments" and not member.bot:
         await member.remove_roles(discord.utils.get(guild.roles,name="Game nights"))
+    elif(str(payload.emoji) == '⛑️') and channel.name == "role-assignments" and not member.bot:
+        await member.remove_roles(discord.utils.get(guild.roles,name="Relief"))
 
 @client.event
 async def on_message(message): # all reaction from message

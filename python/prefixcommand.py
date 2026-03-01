@@ -228,11 +228,15 @@ async def optionalRolesMessage(guild):
     embed.add_field(name='Game Night Role 🎮',
             value='Click this role to join community game nights—all users are welcome.',
             inline=False)
+    embed.add_field(name='Relief Role ⛑️',
+            value='Looking to help out your fellow controllers? Click this role to gain access to the Relief channel and receive notifications when staffing assistance is needed.',
+            inline=False)
     embed.set_footer(text = 'Maintained by the v'+FACILITY_ID+' Web Services Team')
 
     msg = await channel.send(embed = embed)
     await msg.add_reaction('✈️')
     await msg.add_reaction('🎮')
+    await msg.add_reaction('⛑️')
 
 
 async def spontaneous_embed(message):
@@ -1015,8 +1019,10 @@ async def send_relief_workload_alert(
     content = None
 
     #mentions = await build_relief_ping_list(guild=guild, channel=channel, callsign=callsign)
-
-    content = "@here"
+    if not alert_type == "workload":
+        content = "@here"
+    else:
+        content = ""
 
     '''
     # If content is huge, split it (Discord 2000 char limit)
