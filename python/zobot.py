@@ -215,8 +215,6 @@ async def on_message(message): # all reaction from message
         if not(command == "activity" or command == "removeroles"):
             await message.delete(delay=1.0)
 
-
-
 @tasks.loop(seconds=60)
 async def monitor_active_controller():
     # Load active controller list
@@ -244,9 +242,16 @@ async def monitor_active_controller():
         currn_active.add(discord_id)
 
         member = guild.get_member(int(discord_id))
-        await member.add_roles(act_role)
         if not member:
             print(f"Discord member {discord_id} not found in guild.")
+            continue
+        try:
+            await member.add_roles(act_role)
+        except discord.Forbidden:
+            print(f"Missing permission to add role for {member.name}")
+            continue
+        except discord.HTTPException as e:
+            print(f"Failed to add role for {member.name}: {e}")
             continue
 
         # Determine new nickname based on role
@@ -273,20 +278,28 @@ async def monitor_active_controller():
                 print(f"Updated nickname for {member.name} → {newName}")
             except discord.Forbidden:
                 print(f"Missing permission to update nickname for {member.name}")
+            except Exception as e:
+                print(f"Error updating nickname for {member.name}: {e}")
 
     # Restore names for controllers who are no longer active
     to_delete = []
     for discord_id, data in nicknames.items():
         if discord_id not in currn_active:
             member = guild.get_member(int(discord_id))
-            await member.remove_roles(act_role)
+            try:
+                await member.remove_roles(act_role)
+            except discord.HTTPException as e:
+                print(f"Failed to remove role for {discord_id}: {e}")
+                continue
             if member:
-                to_delete.append(discord_id)
                 try:
                     await member.edit(nick=data["original_name"])
+                    to_delete.append(discord_id)
                     print(f"Restored nickname for {member.name}")
                 except discord.Forbidden:
                     print(f"Missing permission to restore nickname for {member.name}")
+                except Exception as e:
+                    print(f"Error restoring nickname for {member.name}: {e}")
             else:
                 print(f"Member with Discord ID {discord_id} not found for restoration.")
 
@@ -340,8 +353,10 @@ async def monitor_active_controller():
                         )
         except Exception as e:
             print(f"workload fetch failed: {e}")
-
-
+            
+@monitor_active_controller.error
+async def monitor_error(error):
+    print(f"Monitor task error: {error}")
 
 @client.event
 async def on_voice_state_update(member, before, after):
