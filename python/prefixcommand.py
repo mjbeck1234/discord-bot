@@ -423,7 +423,7 @@ async def removeroles(message,guild):
 
 async def addEvent(message,guild):
     eventid = message.content.lower().replace(prefix+'addevent ',"")
-    query = site_url+'/api/data/bot/event.php?event_id='+str(eventid)
+    query = site_url+'/api/data/bot/event?event_id='+str(eventid)
     event = await webQuery_async(query,site_token)
     if (not event['id']=='None'):
         startTime = datetime.strptime(event['time_start'] + '+0000','%Y-%m-%dT%H:%M%z')
@@ -472,7 +472,7 @@ async def waitlist(guild):
         channel = discord.utils.get(guild.channels, id=SNR_Channel_ID)
 
         # fetch count info
-        query = site_url+'/api/data/bot/vis_loa.php?'
+        query = site_url+'/api/data/bot/vis_loa'
         counts = await webQuery_async(query,site_token)
         # create embed msg
         if (int(counts['visit']) and int(counts['loa'])):
@@ -560,11 +560,11 @@ async def sendTrainingReminder(guild):
 
             # Get discord info
             provider_id = await webQuery_async(
-                f"{site_url}/api/data/bot/user.php?cid={session['mentor']}",
+                f"{site_url}/api/data/bot/user?cid={session['mentor']}",
                 key=site_token
             )
             customer_id = await webQuery_async(
-                f"{site_url}/api/data/bot/user.php?cid={session['student']}",
+                f"{site_url}/api/data/bot/user?cid={session['student']}",
                 key=site_token
             )
 
@@ -628,7 +628,7 @@ async def sendTrainingReminder(guild):
 async def myAppointment(message,guild):
     hasSession = False
     try:
-        user = await webQuery_async(site_url + '/api/data/bot/discordID2CID.php?discord_id='+str(message.author.id),key = site_token)
+        user = await webQuery_async(site_url + '/api/data/bot/discordID2CID?discord_id='+str(message.author.id),key = site_token)
         
         if not user:
             await message.author.send(content = "I cannot find your information in the scheduling system")
@@ -664,11 +664,11 @@ async def myAppointment(message,guild):
 
             # Get discord info
             provider_id = await webQuery_async(
-                f"{site_url}/api/data/bot/user.php?cid={session['mentor']}",
+                f"{site_url}/api/data/bot/user?cid={session['mentor']}",
                 key=site_token
             )
             customer_id = await webQuery_async(
-                f"{site_url}/api/data/bot/user.php?cid={session['student']}",
+                f"{site_url}/api/data/bot/user?cid={session['student']}",
                 key=site_token
             )
 
@@ -734,7 +734,7 @@ async def reliefEmbed(guild):
 async def requestRelief(message, command, guild, alert_type):
     try:
         try:
-            user = await webQuery_async(site_url + '/api/data/bot/discordID2CID.php?discord_id='+str(message.author.id),key = site_token)
+            user = await webQuery_async(site_url + '/api/data/bot/discordID2CID?discord_id='+str(message.author.id),key = site_token)
         except Exception as e:
             print("discordID2CID fetch failed:", e)
             return await message.author.send("**ERROR**\n Unable to look up your CID right now.")
@@ -951,7 +951,7 @@ async def build_relief_ping_list(
         async with sem:
             try:
                 payload = await webQuery_async(
-                    site_url + "/api/data/bot/discordID2CID.php?discord_id=" + str(u.id),
+                    site_url + "/api/data/bot/discordID2CID?discord_id=" + str(u.id),
                     key=site_token
                 )
             except Exception:

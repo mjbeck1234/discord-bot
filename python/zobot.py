@@ -218,7 +218,7 @@ async def on_message(message): # all reaction from message
 @tasks.loop(seconds=60)
 async def monitor_active_controller():
     # Load active controller list
-    actives = await webQuery_async(site_url + '/api/data/bot/activeControllers.php', site_token)
+    actives = await webQuery_async(site_url + '/api/data/bot/activeControllers', site_token)
 
     # Load existing nickname records
     try:
